@@ -15,7 +15,7 @@ const AdminClasses = () => {
     const [subjectForm, setSubjectForm] = useState({ classId: null, nameEn: '', nameHi: '' });
     const [showSubjectForm, setShowSubjectForm] = useState(null); // classId or null
 
-    const API_BASE = 'https://localhost:7233/api/Admin';
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Admin`;
 
     // ========== FETCH ==========
     const fetchClasses = async () => {

@@ -11,7 +11,7 @@ const AdminAnnouncements = () => {
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({ titleEn: '', titleHi: '', contentEn: '', contentHi: '' });
 
-    const API_BASE = 'https://localhost:7233/api/Admin';
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Admin`;
 
     // Fetch all announcements
     const fetchAnnouncements = async () => {

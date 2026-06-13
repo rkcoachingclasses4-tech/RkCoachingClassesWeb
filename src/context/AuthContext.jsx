@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
-    const API_URL = 'https://localhost:7233/api/Authenticate';
+    const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/Authenticate`;
 
     const parseJwt = (token) => {
         try {

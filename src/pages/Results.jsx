@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../App';
 
-const API_BASE = 'https://localhost:7233/api/PublicData';
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/PublicData`;
 
 // Color themes for different class cards
 const classColors = [

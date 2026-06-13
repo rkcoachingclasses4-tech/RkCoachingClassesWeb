@@ -27,8 +27,8 @@ const AdminResults = () => {
         resultStatus: 'Pass' 
     });
 
-    const API_BASE = 'https://localhost:7233/api/Admin';
-    const PUBLIC_API = 'https://localhost:7233/api/PublicData';
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Admin`;
+    const PUBLIC_API = `${import.meta.env.VITE_API_BASE_URL}/api/PublicData`;
 
     // Subjects for the currently selected class
     const selectedClass = classes.find(c => String(c.level) === formData.classLevel);

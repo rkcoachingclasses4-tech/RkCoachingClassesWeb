@@ -8,7 +8,7 @@ const Announcement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     
     const itemsPerPage = 3;
-    const API_URL = 'https://localhost:7233/api/PublicData/announcements';
+    const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/PublicData/announcements`;
 
     useEffect(() => {
         const fetchAnnouncements = async () => {

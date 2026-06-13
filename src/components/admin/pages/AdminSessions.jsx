@@ -11,7 +11,7 @@ const AdminSessions = () => {
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({ name: '', isActive: true });
 
-    const API_BASE = 'https://localhost:7233/api/Admin';
+    const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/Admin`;
 
     const fetchSessions = async () => {
         try {
