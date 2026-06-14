@@ -39,9 +39,7 @@ const AdminResults = () => {
         try {
             const [classRes, sessionRes] = await Promise.all([
                 fetch(`${PUBLIC_API}/classes`),
-                fetch(`${API_BASE}/sessions`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
+                fetch(`${PUBLIC_API}/sessions`)
             ]);
             if (classRes.ok) {
                 const classData = await classRes.json();
