@@ -234,7 +234,8 @@ const Results = () => {
                                 {lang === 'en' ? 'Current Live' : 'वर्तमान लाइव'}:
                             </span>
                             <span className="text-lg font-black text-[var(--accent)]">{activeSession.name}</span>
-                    </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-16 md:space-y-24">
