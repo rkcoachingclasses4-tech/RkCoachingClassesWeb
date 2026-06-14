@@ -70,7 +70,7 @@ const Home = () => {
           <div className="absolute -inset-4 bg-gradient-to-tr from-[var(--accent)] to-transparent opacity-20 blur-2xl rounded-full"></div>
           <div className="relative rounded-[40px] overflow-hidden border-8 border-white shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500 bg-gray-100 group">
             <img
-              src="/founder.png"
+              src="/founderCEO.jpeg"
               alt={t.founder.name}
               className="w-full h-[500px] object-cover group-hover:scale-105 transition-transform duration-700"
             />
