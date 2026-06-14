@@ -21,24 +21,42 @@ const Results = () => {
     const [selectedSubjects, setSelectedSubjects] = useState({}); // { classLevel: subjectName }
     const [loadingClasses, setLoadingClasses] = useState(true);
     const [activeSession, setActiveSession] = useState(null);
+    const [sessions, setSessions] = useState([]);
+    const [selectedSessionId, setSelectedSessionId] = useState(null);
     const [loadingSession, setLoadingSession] = useState(true);
+    const [loadingSessions, setLoadingSessions] = useState(true);
 
-    // Fetch active session
+    // Fetch active session and all sessions
     useEffect(() => {
-        const fetchActiveSession = async () => {
+        const fetchSessions = async () => {
             try {
-                const response = await fetch(`${API_BASE}/active-session`);
-                if (response.ok) {
-                    const data = await response.json();
+                const [activeRes, sessionsRes] = await Promise.all([
+                    fetch(`${API_BASE}/active-session`),
+                    fetch(`${API_BASE}/sessions`)
+                ]);
+                if (activeRes.ok) {
+                    const data = await activeRes.json();
                     setActiveSession(data);
                 }
+                if (sessionsRes.ok) {
+                    const data = await sessionsRes.json();
+                    setSessions(data);
+                    // Set selected session to the first one, preferring active session
+                    const activeOne = data.find(s => s.isActive);
+                    if (activeOne) {
+                        setSelectedSessionId(activeOne.id);
+                    } else if (data.length > 0) {
+                        setSelectedSessionId(data[0].id);
+                    }
+                }
             } catch (error) {
-                console.error("Error fetching active session:", error);
+                console.error("Error fetching sessions:", error);
             } finally {
                 setLoadingSession(false);
+                setLoadingSessions(false);
             }
         };
-        fetchActiveSession();
+        fetchSessions();
     }, []);
 
     // Fetch classes from database
@@ -68,20 +86,21 @@ const Results = () => {
         fetchClasses();
     }, []);
 
-    // Fetch results when subject selection changes (only if active session exists)
+    // Fetch results when subject selection or session changes
     useEffect(() => {
-        if (!activeSession) return;
+        if (!selectedSessionId) return;
         Object.entries(selectedSubjects).forEach(([level, subject]) => {
             if (subject) {
                 fetchResults(parseInt(level), subject);
             }
         });
-    }, [selectedSubjects, activeSession]);
+    }, [selectedSubjects, selectedSessionId]);
 
     const fetchResults = async (classLevel, subject) => {
         setClassLoading(prev => ({ ...prev, [classLevel]: true }));
         try {
-            const response = await fetch(`${API_BASE}/results?classLevel=${classLevel}&subject=${subject}`);
+            const sessionParam = selectedSessionId ? `&session=${selectedSessionId}` : '';
+            const response = await fetch(`${API_BASE}/results?classLevel=${classLevel}&subject=${subject}${sessionParam}`);
             if (response.ok) {
                 const data = await response.json();
                 // Sort by marks highest first
@@ -151,7 +170,7 @@ const Results = () => {
         );
     };
 
-    if (loadingClasses || loadingSession) {
+    if (loadingClasses || loadingSession || loadingSessions) {
         return (
             <section className="py-20 px-4 md:px-6 bg-[var(--bg)] min-h-screen text-center">
                 <div className="text-[var(--accent)] font-bold text-lg">Loading...</div>
@@ -159,8 +178,8 @@ const Results = () => {
         );
     }
 
-    // No active session — show a friendly message
-    if (!activeSession) {
+    // No sessions available
+    if (sessions.length === 0) {
         return (
             <section className="py-20 px-4 md:px-6 bg-[var(--bg)] min-h-screen">
                 <div className="max-w-7xl mx-auto text-center">
@@ -171,10 +190,7 @@ const Results = () => {
                     <div className="py-16 bg-[var(--code-bg)] border border-dashed border-[var(--border)] rounded-3xl">
                         <div className="text-5xl mb-4">📅</div>
                         <p className="text-gray-500 text-xl font-bold">
-                            {lang === 'en' ? 'No active session at the moment.' : 'अभी कोई सक्रिय सत्र नहीं है।'}
-                        </p>
-                        <p className="text-gray-400 text-sm mt-2">
-                            {lang === 'en' ? 'Results will be displayed once an academic session is activated.' : 'शैक्षणिक सत्र सक्रिय होने पर परिणाम प्रदर्शित होंगे।'}
+                            {lang === 'en' ? 'No sessions available.' : 'कोई सत्र उपलब्ध नहीं है।'}
                         </p>
                     </div>
                 </div>
@@ -188,16 +204,36 @@ const Results = () => {
                 <div className="text-center mb-12 md:mb-16 animate-in fade-in zoom-in duration-700">
                     <h1 className="text-4xl md:text-5xl font-black mb-4 text-[var(--text-h)] tracking-tighter leading-tight">{t.results.title}</h1>
                     <p className="text-lg md:text-xl text-[var(--text)]">{t.results.subtitle}</p>
-                    {/* Active session badge */}
-                    <div className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-[var(--accent-bg)] border border-[var(--accent)]/30 rounded-full shadow-lg">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                        </span>
-                        <span className="text-sm font-bold text-[var(--text)]">
-                            {lang === 'en' ? 'Session' : 'सत्र'}:
-                        </span>
-                        <span className="text-lg font-black text-[var(--accent)]">{activeSession.name}</span>
+                    
+                    {/* Session selector */}
+                    <div className="flex flex-col items-center gap-4 mt-8">
+                        <label className="text-sm font-bold text-[var(--text)] opacity-70">
+                            {lang === 'en' ? 'Select Session' : 'सत्र चुनें'}
+                        </label>
+                        <select
+                            value={selectedSessionId || ''}
+                            onChange={(e) => setSelectedSessionId(parseInt(e.target.value))}
+                            className="px-6 py-3 bg-[var(--code-bg)] border border-[var(--border)] rounded-xl text-[var(--text)] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--accent)] cursor-pointer"
+                        >
+                            {sessions.map(session => (
+                                <option key={session.id} value={session.id}>
+                                    {session.name} {session.isActive ? '(Active)' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {/* Active session badge - shown only if there's an active session */}
+                    {activeSession && (
+                        <div className="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-[var(--accent-bg)] border border-[var(--accent)]/30 rounded-full shadow-lg">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            </span>
+                            <span className="text-sm font-bold text-[var(--text)]">
+                                {lang === 'en' ? 'Current Live' : 'वर्तमान लाइव'}:
+                            </span>
+                            <span className="text-lg font-black text-[var(--accent)]">{activeSession.name}</span>
                     </div>
                 </div>
 
